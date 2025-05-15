@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role_id',
     ];
 
     /**
@@ -49,5 +50,15 @@ class User extends Authenticatable
     public function decks()
     {
         return $this->hasMany(Deck::class);
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role != null && $this->role->name === 'admin';
     }
 }

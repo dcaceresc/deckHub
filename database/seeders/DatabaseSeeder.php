@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             CardSeeder::class,
             DeckSeeder::class,
             DeckCardSeeder::class,
+            RoleSeeder::class,
         ]);
     }
 }
