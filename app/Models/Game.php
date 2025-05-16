@@ -10,7 +10,7 @@ class Game extends Model
 
     public function cardTypes()
     {
-        return $this->hasMany(CardType::class);
+        return $this->belongsToMany(CardType::class);
     }
 
     public function cards()

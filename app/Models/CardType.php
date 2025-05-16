@@ -8,9 +8,9 @@ class CardType extends Model
 {
     protected $fillable = ['name', 'game_id'];
 
-    public function game()
+    public function games()
     {
-        return $this->belongsTo(Game::class);
+        return $this->belongsToMany(Game::class);
     }
 
     public function cards()

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\GameController;
 use App\Http\Controllers\Admin\CardController;
+use App\Http\Controllers\Admin\CardTypeController;
 
 
 Route::get('/', function () {
@@ -51,6 +52,14 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
     Route::get('cards/{card}/edit', [CardController::class, 'edit'])->name('admin.cards.edit');
     Route::patch('cards/{card}', [CardController::class, 'update'])->name('admin.cards.update');
     Route::delete('cards/{card}', [CardController::class, 'destroy'])->name('admin.cards.destroy');
+
+    Route::get('card-types', [CardTypeController::class, 'index'])->name('admin.card-types.index');
+    Route::get('card-types/create', [CardTypeController::class, 'create'])->name('admin.card-types.create');
+    Route::post('card-types', [CardTypeController::class, 'store'])->name('admin.card-types.store');
+    Route::get('card-types/{cardType}/edit', [CardTypeController::class, 'edit'])->name('admin.card-types.edit');
+    Route::patch('card-types/{cardType}', [CardTypeController::class, 'update'])->name('admin.card-types.update');
+    Route::delete('card-types/{cardType}', [CardTypeController::class, 'destroy'])->name('admin.card-types.destroy');
+    Route::get('card-types/by-game/{game}', [CardTypeController::class, 'getByGame'])->name('admin.card-types.by-game');
 
 });
 

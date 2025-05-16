@@ -19,7 +19,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('admin.cards.store') }}" method="POST" class="space-y-4">
+                    <form action="{{ route('admin.cards.store') }}" method="POST" class="space-y-4" enctype="multipart/form-data">
                         @csrf
 
                         <div>
@@ -32,9 +32,9 @@
                         </div>
 
                         <div>
-                            <label for="name"
+                            <label for="description"
                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-                            <input type="text" id="name" name="name" required
+                            <input type="text" id="description" name="description" required
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
                                       dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 value="{{ old('description') }}">
@@ -43,13 +43,13 @@
                         <div>
                             <label for="game_id"
                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Juego</label>
-                            <select id="game_id" name="game_id" required
+                            <select name="game_id" id="game_id"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
-                                       dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                <option disabled value="">Selecciona un juego</option>
-                                @foreach ($games as $game)
-                                    <option value="{{ $game->id }}"
-                                        {{ old('game_id') == $game->id ? 'selected' : '' }}>
+                                       dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                       onchange="fetchCardTypes(this.value)">
+                                <option disabled value="" selected>Selecciona un juego</option>
+                                @foreach($games as $game)
+                                    <option value="{{ $game->id }}" {{ old('game_id') == $game->id ? 'selected' : '' }}>
                                         {{ $game->name }}
                                     </option>
                                 @endforeach
@@ -62,14 +62,19 @@
                             <select id="card_type_id" name="card_type_id" required
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
                                        dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                <option disabled value="">Selecciona un rol</option>
-                                @foreach ($cardTypes as $cardType)
-                                    <option value="{{ $cardType->id }}"
-                                        {{ old('game_id') == $cardType->id ? 'selected' : '' }}>
-                                        {{ $cardType->name }}
-                                    </option>
-                                @endforeach
+                                <option value="">Selecciona un juego primero</option>
                             </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="image" class="block mb-2 text-sm font-medium text-gray-900">Imagen</label>
+                            <input type="file" name="image" id="image"
+                                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                            @if(isset($card) && $card->image)
+                                <div class="mt-2">
+                                    <img src="{{ asset('storage/' . $card->image) }}" alt="Imagen actual" class="w-32 h-32 object-cover rounded">
+                                </div>
+                            @endif
                         </div>
 
 
@@ -89,4 +94,39 @@
         </div>
 
     </div>
+
+        <script>
+            async function fetchCardTypes(gameId) {
+                const typeSelect = document.getElementById('card_type_id');
+                typeSelect.innerHTML = '<option value="">Cargando tipos...</option>';
+
+                if (!gameId) {
+                    typeSelect.innerHTML = '<option value="">Selecciona un juego primero</option>';
+                    return;
+                }
+
+                const response = await fetch(`/admin/card-types/by-game/${gameId}`);
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    typeSelect.innerHTML = '<option value="">Sin tipos disponibles</option>';
+                } else {
+                    typeSelect.innerHTML = '<option value="" disabled selected>Selecciona un tipo</option>';
+                    data.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type.id;
+                        option.text = type.name;
+                        typeSelect.appendChild(option);
+                    });
+                }
+            }
+
+            // Cargar los tipos si ya hay un juego seleccionado (por validación fallida, etc)
+            document.addEventListener('DOMContentLoaded', function () {
+                const selectedGameId = document.getElementById('game_id').value;
+                if (selectedGameId) {
+                    fetchCardTypes(selectedGameId);
+                }
+            });
+        </script>
 </x-app-layout>

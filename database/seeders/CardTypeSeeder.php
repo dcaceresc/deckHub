@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\CardType;
 use App\Models\Game;
+use App\Models\CardTypeGame;
 use Illuminate\Database\Seeder;
 
 class CardTypeSeeder extends Seeder
@@ -13,14 +14,43 @@ class CardTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        $pokemonTCG = Game::where('name', 'Pokémon TCG')->first();
-        $yugioh = Game::where('name', 'Yu-Gi-Oh!')->first();
 
-         CardType::insert([
-            ['name' => 'Pokémon Básico', 'game_id' => $pokemonTCG->id, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Entrenador', 'game_id' => $pokemonTCG->id, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Monstruo', 'game_id' => $yugioh->id, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Mágica', 'game_id' => $yugioh->id, 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        // Crear algunos tipos de carta
+        $types = [
+            'Monstruo',
+            'Hechizo',
+            'Pokemón Básico',
+            'Entrenador',
+        ];
+
+        foreach ($types as $typeName) {
+            $cardType = CardType::firstOrCreate(['name' => $typeName]);
+        }
+
+        // Obtener juegos existentes
+        $pokemonTCG = Game::where('name', 'Pokémon TCG')->first();
+        $pokemonTCGPocket = Game::where('name', 'Pokémon TCG Pocket')->first();
+        $yugioh  = Game::where('name', 'Yu-Gi-Oh!')->first();
+
+        // Asociar tipos con juegos
+        $typeGameMap = [
+            'Monstruo'  => [$yugioh],
+            'Hechizo'   => [$yugioh],
+            'Pokemón Básico' => [$pokemonTCG, $pokemonTCGPocket],
+            'Entrenador'   => [$pokemonTCG, $pokemonTCGPocket],
+        ];
+
+        foreach ($typeGameMap as $typeName => $games) {
+            $cardType = CardType::where('name', $typeName)->first();
+
+            foreach ($games as $game) {
+                if ($cardType && $game) {
+                    CardTypeGame::firstOrCreate([
+                        'card_type_id' => $cardType->id,
+                        'game_id' => $game->id,
+                    ]);
+                }
+            }
+        }
     }
 }
